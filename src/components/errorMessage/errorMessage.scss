@@ -1,9 +1,20 @@
 .errorImg {
-  width: 80px;
   display: block;
-  margin: 20px auto;
+  width: 130px;
+  height:130px;
+  margin: 0 auto;
 }
 
 .errorBlock {
   margin: 0 auto;
+  padding: 15px;
+}
+
+.errorTitle {
+  color: #9F0013;
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-bottom: 0.2em;
+  line-height: 1em;
+  text-align: center;
 }

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import PropTypes from "prop-types";
 
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
@@ -11,14 +11,12 @@ import './charList.scss';
 const CharList = ({onCharSelected}) => {
 
     const [characters, setCharacters] = useState([]);
-    const [firstLoading, setFirstLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charListEnded, setCharListEnded] = useState(false);
     const [prevClickedChar, setPrevClickedChar] = useState(null);
 
-    const marvelService = new MarvelService();
+    const {loading, error, getCharactersList} = useMarvelService();
 
     const onCharListLoaded = (newCharListInfo) => {
         if (newCharListInfo.length < 9) {
@@ -26,27 +24,17 @@ const CharList = ({onCharSelected}) => {
         }
 
         setCharacters(characters => [...characters, ...newCharListInfo]);
-        setFirstLoading(false);
         setLoadingMore(false);
         setOffset(offset => offset + 9);
     };
 
-    const onCharListLoadingMore = () => setLoadingMore(true);
-
-    const onError = () => {
-        setFirstLoading(false);
-        setError(true);
+    const updateCharList = (offset, initial) => {
+        initial ? setLoadingMore(false) : setLoadingMore(true);
+        getCharactersList(offset).then(onCharListLoaded);
     }
-
-    const setCharList = (offset) => {
-        onCharListLoadingMore();
-
-        marvelService.getCharactersList(offset).then(onCharListLoaded).catch(onError);
-    }
-
 
     useEffect(() => {
-        setCharList()
+        updateCharList(offset, true)
     }, []);
 
     const onCharFocused = (charRef) => {
@@ -68,9 +56,8 @@ const CharList = ({onCharSelected}) => {
                               onCharFocused={onCharFocused}/>
     })
 
-    const spinner = firstLoading ? <Spinner/> : null;
+    const spinner = loading && !loadingMore ? <Spinner/> : null;
     const errorMessage = error ? <ErrorMessage/> : null;
-    const content = !(errorMessage || spinner) ? charItemsList : null;
     const styleButton = {'display': charListEnded ? 'none' : 'block'};
 
     return (
@@ -78,9 +65,9 @@ const CharList = ({onCharSelected}) => {
             {errorMessage}
             {spinner}
             <ul className="char__grid">
-                {content}
+                {charItemsList}
             </ul>
-            <button style={styleButton} onClick={() => setCharList(offset)}
+            <button style={styleButton} onClick={() => updateCharList(offset, false)}
                     className="button button__main button__long"
                     disabled={loadingMore}>
                 <div className="inner">load more</div>

@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import PropTypes from "prop-types";
 
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 
 import ErrorMessage from "../errorMessage/ErrorMessage";
 import Spinner from "../spinner/Spinner";
@@ -12,27 +12,17 @@ import './charInfo.scss';
 const CharInfo = ({charSelectedId}) => {
 
     const [character, setCharacter] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
 
-    const marvelService = new MarvelService();
+    const {loading, error, getCharacterInfo, clearError} = useMarvelService();
 
     const onCharLoaded = (charInfo) => {
         setCharacter(charInfo);
-        setLoading(false);
     };
 
-    const onError = () => {
-
-        setLoading(false);
-        setError(true);
-    }
-
     const setCharInfo = (id) => {
+        clearError();
         if (!id) return;
-        setLoading(true);
-
-        marvelService.getCharacterInfo(id).then(onCharLoaded).catch(onError);
+        getCharacterInfo(id).then(onCharLoaded);
     }
 
     useEffect(() => {
