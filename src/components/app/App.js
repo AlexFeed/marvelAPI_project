@@ -10,7 +10,7 @@ const App = (props) => {
             <div className="app">
                 <AppHeader/>
                 <main>
-                    <Routes>
+                    <Routes basename={process.env.PUBLIC_URL}>
                         <Route path="/" element={<MainPage/>}/>
                         <Route path="/marvel_project" element={<MainPage/>}/>
                         <Route path="/comics" element={<ComicsPage/>}/>
