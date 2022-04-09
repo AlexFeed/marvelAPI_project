@@ -1,12 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
 import PropTypes from "prop-types";
+import {CSSTransition, TransitionGroup} from "react-transition-group";
 
-import useMarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/useMarvelService";
 
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 
 import './charList.scss';
+
 
 const CharList = ({onCharSelected}) => {
 
@@ -50,10 +52,13 @@ const CharList = ({onCharSelected}) => {
 
 
     const charItemsList = characters.map(characterInfo => {
-        return <CharacterItem key={characterInfo.id}
-                              onCharSelected={() => onCharSelected(characterInfo.id)}
-                              name={characterInfo.name} thumbnail={characterInfo.thumbnail}
-                              onCharFocused={onCharFocused}/>
+        return (
+            <CSSTransition key={characterInfo.id} timeout={500} classNames="char__transition">
+                <CharacterItem onCharSelected={() => onCharSelected(characterInfo.id)}
+                               name={characterInfo.name} thumbnail={characterInfo.thumbnail}
+                               onCharFocused={onCharFocused}/>
+            </CSSTransition>
+        )
     })
 
     const spinner = loading && !loadingMore ? <Spinner/> : null;
@@ -65,7 +70,9 @@ const CharList = ({onCharSelected}) => {
             {errorMessage}
             {spinner}
             <ul className="char__grid">
-                {charItemsList}
+                <TransitionGroup className="char__transitionGroup char__grid">
+                    {charItemsList}
+                </TransitionGroup>
             </ul>
             <button style={styleButton} onClick={() => updateCharList(offset, false)}
                     className="button button__main button__long"

@@ -1,15 +1,17 @@
 import {useEffect, useState} from "react";
 import {NavLink} from "react-router-dom";
+import {CSSTransition, TransitionGroup} from "react-transition-group";
 
-import useMarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/useMarvelService";
 
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 
 import './comicsList.scss';
 
+
 const ComicsList = () => {
-    const {loading, error, getComicsList} = useMarvelService();
+    const {loading, error, getComicsList, clearError} = useMarvelService();
 
     const [comicsData, setComicsData] = useState([]);
     const [charListEnded, setCharListEnded] = useState(false);
@@ -27,6 +29,7 @@ const ComicsList = () => {
     }
 
     const updateComicsList = (offset, initial) => {
+        clearError()
         initial ? setLoadingMore(false) : setLoadingMore(true);
         getComicsList(offset).then(onComicsListLoaded);
     }
@@ -36,11 +39,16 @@ const ComicsList = () => {
     }, []);
 
 
-    const comicsListItems = comicsData.map((comicsListItem, i) => <ComicsListItem key={i}
-                                                                                  thumbnail={comicsListItem.thumbnail}
-                                                                                  title={comicsListItem.title}
-                                                                                  price={comicsListItem.price}
-                                                                                  id={comicsListItem.id}/>);
+    const comicsListItems = comicsData.map((comicsListItem, i) => {
+        return (
+            <CSSTransition timeout={500} classNames={'comics__item-transition'} className={'comics__item'} key={i}>
+                <ComicsListItem thumbnail={comicsListItem.thumbnail}
+                                title={comicsListItem.title}
+                                price={comicsListItem.price}
+                                id={comicsListItem.id}/>
+            </CSSTransition>
+        )
+    })
 
     const spinner = loading && !loadingMore ? <Spinner/> : null;
     const errorMessage = error ? <ErrorMessage/> : null;
@@ -51,7 +59,9 @@ const ComicsList = () => {
             {spinner}
             {errorMessage}
             <ul className="comics__grid">
-                {comicsListItems}
+                <TransitionGroup className="comics__transitionGroup comics__grid">
+                    {comicsListItems}
+                </TransitionGroup>
             </ul>
             <button style={styleButton} disabled={loadingMore} onClick={() => updateComicsList(offset, false)}
                     className="button button__main button__long">
